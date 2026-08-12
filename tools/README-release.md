@@ -40,6 +40,10 @@ Actions**:
 The workflow fails loudly if `KEYSTORE_BASE64` is missing rather than
 publishing an APK nobody can install.
 
+**Nothing above belongs in this file.** This repository is public, and git
+keeps what you commit even after you delete it. The passwords exist in the
+secret store and in your own password manager, nowhere else.
+
 ## Building signed locally
 
 Put the same values in `local.properties`, which is git-ignored:
