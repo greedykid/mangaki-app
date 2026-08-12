@@ -52,10 +52,28 @@ class MangaSourcesRepository @Inject constructor(
 	private val dao: MangaSourcesDao
 		get() = db.getSourcesDao()
 
+	/**
+	 * Every source this build offers, narrowed to the locales in [ENABLED_LOCALES].
+	 *
+	 * The upstream library ships around 1250 parsers for every language it
+	 * covers. Mangaki is an Indonesian reader, so the other ~1130 are noise:
+	 * they bloat the source catalogue, the search-everywhere screens and the
+	 * settings list with entries nobody here will ever switch on.
+	 *
+	 * Filtered in one place on purpose. Every source list in the app funnels
+	 * through this property, so nothing downstream needs to know about it —
+	 * and widening the selection later is one line rather than an audit.
+	 *
+	 * Note the parsers themselves are a Maven dependency, not source in this
+	 * repo, so they cannot be deleted; excluding them here is what "only
+	 * Indonesian sources" means in practice.
+	 */
 	val allMangaSources: Set<MangaParserSource> = Collections.unmodifiableSet(
 		EnumSet.noneOf<MangaParserSource>(MangaParserSource::class.java).also {
-            MangaParserSource.entries.filterNotTo(it, MangaParserSource::isBroken)
-        }
+			MangaParserSource.entries.filterTo(it) { source ->
+				!source.isBroken && source.locale in ENABLED_LOCALES
+			}
+		}
 	)
 
 	suspend fun getEnabledSources(): List<MangaSource> {
@@ -402,4 +420,21 @@ class MangaSourcesRepository @Inject constructor(
 	}
 
 	private fun String.toMangaSourceOrNull(): MangaParserSource? = MangaParserSource.entries.find { it.name == this }
+
+	companion object {
+
+		/**
+		 * Locales whose sources this build offers, as the parser library tags
+		 * them — the third argument of its `@MangaSourceParser` annotation.
+		 *
+		 * Add a locale here to widen the catalogue; `null` would let through
+		 * the sources that declare no language at all, which are mostly
+		 * aggregators and adult sites rather than anything Indonesian.
+		 *
+		 * It must never select an empty set: several callers pass the result
+		 * to `EnumSet.copyOf`, which cannot infer an element type from an
+		 * empty collection and throws.
+		 */
+		private val ENABLED_LOCALES = setOf("id")
+	}
 }
