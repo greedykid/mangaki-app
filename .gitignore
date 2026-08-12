@@ -28,3 +28,10 @@
 /.idea/deviceManager.xml
 /.kotlin/
 /.idea/AndroidProjectSystem.xml
+
+# Signing keys. The keystore lives outside this tree and in GitHub secrets;
+# committing one to a public repo hands over the ability to publish updates
+# as this app, and git would keep it after any deletion.
+*.jks
+*.keystore
+*.p12
