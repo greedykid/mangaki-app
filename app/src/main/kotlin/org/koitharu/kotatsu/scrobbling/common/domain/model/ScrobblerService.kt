@@ -2,16 +2,21 @@ package org.koitharu.kotatsu.scrobbling.common.domain.model
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import org.koitharu.kotatsu.R
 
+/**
+ * Reading trackers this build supports — none.
+ *
+ * Shikimori, AniList, MyAnimeList and Kitsu were removed with the credentials
+ * they needed: those were OAuth applications registered to upstream, and an
+ * app under a different name has no business authenticating as them.
+ *
+ * The type is kept rather than deleted because the scrobbling tables, their
+ * Room migrations and the backup format all still reference it. An empty enum
+ * makes every list of trackers empty and every lookup fail to resolve, which
+ * is what "no trackers" should mean, without rewriting the schema.
+ */
 enum class ScrobblerService(
 	val id: Int,
 	@StringRes val titleResId: Int,
 	@DrawableRes val iconResId: Int,
-) {
-
-	SHIKIMORI(1, R.string.shikimori, R.drawable.ic_shikimori),
-	ANILIST(2, R.string.anilist, R.drawable.ic_anilist),
-	MAL(3, R.string.mal, R.drawable.ic_mal),
-	KITSU(4, R.string.kitsu, R.drawable.ic_kitsu)
-}
+)

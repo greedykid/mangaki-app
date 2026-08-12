@@ -1,6 +1,5 @@
 package org.koitharu.kotatsu.scrobbling.common.ui.config
 
-import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +18,6 @@ import org.koitharu.kotatsu.core.ui.BaseViewModel
 import org.koitharu.kotatsu.core.util.ext.MutableEventFlow
 import org.koitharu.kotatsu.core.util.ext.call
 import org.koitharu.kotatsu.core.util.ext.onFirst
-import org.koitharu.kotatsu.core.util.ext.require
 import org.koitharu.kotatsu.list.ui.model.EmptyState
 import org.koitharu.kotatsu.list.ui.model.ListModel
 import org.koitharu.kotatsu.scrobbling.common.domain.Scrobbler
@@ -96,20 +94,17 @@ class ScrobblerConfigViewModel @Inject constructor(
 		return result
 	}
 
+	/**
+	 * There are no trackers in this build, so [ScrobblerService.entries] is empty
+	 * and this can only fail. Nothing in the UI reaches this screen any more; the
+	 * lookup stays so an intent arriving some other way is refused outright,
+	 * rather than half-configuring a service that does not exist.
+	 */
 	private fun getScrobblerService(
 		savedStateHandle: SavedStateHandle,
 	): ScrobblerService {
 		val serviceId = savedStateHandle.get<Int>(AppRouter.KEY_ID) ?: 0
-		if (serviceId != 0) {
-			return ScrobblerService.entries.first { it.id == serviceId }
-		}
-		val uri = savedStateHandle.require<Uri>(AppRouter.KEY_DATA)
-		return when (uri.host) {
-			ScrobblerConfigActivity.HOST_SHIKIMORI_AUTH -> ScrobblerService.SHIKIMORI
-			ScrobblerConfigActivity.HOST_ANILIST_AUTH -> ScrobblerService.ANILIST
-			ScrobblerConfigActivity.HOST_MAL_AUTH -> ScrobblerService.MAL
-			ScrobblerConfigActivity.HOST_KITSU_AUTH -> ScrobblerService.KITSU
-			else -> error("Wrong scrobbler uri: $uri")
-		}
+		return ScrobblerService.entries.firstOrNull { it.id == serviceId }
+			?: error("No scrobbler services are available in this build")
 	}
 }

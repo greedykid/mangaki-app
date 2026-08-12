@@ -1,15 +1,24 @@
 package org.koitharu.kotatsu.scrobbling.common.ui
 
-import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
-import androidx.core.net.toUri
 import org.koitharu.kotatsu.scrobbling.common.domain.ScrobblerRepositoryMap
 import org.koitharu.kotatsu.scrobbling.common.domain.model.ScrobblerService
 import org.koitharu.kotatsu.scrobbling.common.domain.model.ScrobblerUser
-import org.koitharu.kotatsu.scrobbling.kitsu.ui.KitsuAuthActivity
 import javax.inject.Inject
 
+/**
+ * Signs a reader in to a tracker, of which this build has none.
+ *
+ * Every method takes a [ScrobblerService], and no value of that type can be
+ * constructed any more, so none of them can actually be called. The class stays
+ * because [org.koitharu.kotatsu.core.exceptions.resolve.ExceptionResolver] holds
+ * a `Provider` for it to answer a `ScrobblerAuthRequiredException` — an
+ * exception nothing can raise now, but the wiring is cheaper to keep than to
+ * unpick from the resolver.
+ *
+ * `startAuth` used to open the tracker's OAuth page in a browser. It no longer
+ * does anything, and says so, rather than reporting a success it did not have.
+ */
 class ScrobblerAuthHelper @Inject constructor(
 	private val repositoriesMap: ScrobblerRepositoryMap,
 ) {
@@ -24,19 +33,7 @@ class ScrobblerAuthHelper @Inject constructor(
 		return repositoriesMap[scrobbler].loadUser()
 	}
 
-	@SuppressLint("UnsafeImplicitIntentLaunch")
-	fun startAuth(context: Context, scrobbler: ScrobblerService) = runCatching {
-		if (scrobbler == ScrobblerService.KITSU) {
-			launchKitsuAuth(context)
-		} else {
-			val repository = repositoriesMap[scrobbler]
-			val intent = Intent(Intent.ACTION_VIEW)
-			intent.data = repository.oauthUrl.toUri()
-			context.startActivity(intent)
-		}
-	}
-
-	private fun launchKitsuAuth(context: Context) {
-		context.startActivity(Intent(context, KitsuAuthActivity::class.java))
+	fun startAuth(context: Context, scrobbler: ScrobblerService): Result<Unit> = runCatching {
+		throw UnsupportedOperationException("No scrobbler services are available in this build")
 	}
 }

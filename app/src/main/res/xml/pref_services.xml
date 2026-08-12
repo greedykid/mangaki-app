@@ -41,33 +41,9 @@
 		android:summary="@string/reading_time_estimation_summary"
 		android:title="@string/reading_time_estimation" />
 
-	<PreferenceCategory android:title="@string/tracking">
-
-		<Preference
-			android:key="anilist"
-			android:summary="@string/loading_"
-			android:title="@string/anilist"
-			app:icon="@drawable/ic_anilist" />
-
-		<Preference
-			android:key="kitsu"
-			android:summary="@string/loading_"
-			android:title="@string/kitsu"
-			app:icon="@drawable/ic_kitsu" />
-
-		<Preference
-			android:key="mal"
-			android:summary="@string/loading_"
-			android:title="@string/mal"
-			app:icon="@drawable/ic_mal" />
-
-		<Preference
-			android:key="shikimori"
-			android:summary="@string/loading_"
-			android:title="@string/shikimori"
-			app:icon="@drawable/ic_shikimori" />
-
-	</PreferenceCategory>
+	<!-- The Tracking category held sign-in entries for AniList, Kitsu,
+	     MyAnimeList and Shikimori. All four are gone with their credentials, and
+	     an empty category would just be a heading over nothing. -->
 
 	<Preference
 		android:fragment="org.koitharu.kotatsu.settings.discord.DiscordSettingsFragment"
