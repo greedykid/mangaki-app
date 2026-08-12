@@ -12,6 +12,14 @@ plugins {
 	// id 'dev.reformator.stacktracedecoroutinator'
 }
 
+// Hoisted out of defaultConfig, where it used to live, so signingConfigs can
+// read it too — a Groovy `def` inside that block is not visible outside it.
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+	localPropertiesFile.withInputStream { localProperties.load(it) }
+}
+
 android {
 	compileSdk = 36
 	buildToolsVersion = '35.0.0'
@@ -32,13 +40,26 @@ android {
 			// https://issuetracker.google.com/issues/408030127
 			generateLocaleConfig false
 		}
-		def localProperties = new Properties()
-		def localPropertiesFile = rootProject.file('local.properties')
-		if (localPropertiesFile.exists()) {
-			localProperties.load(new FileInputStream(localPropertiesFile))
-		}
 		resValue 'string', 'tg_backup_bot_token', localProperties.getProperty('tg_backup_bot_token', '')
 	}
+	// Signed only when a keystore is actually supplied, through the environment
+	// in CI or local.properties on a workstation. Declaring it unconditionally
+	// would break `assembleRelease` for anyone who just cloned the repo, and
+	// the keystore must never be committed.
+	def keystorePath = System.getenv('KEYSTORE_FILE') ?: localProperties.getProperty('keystore.file')
+	def hasKeystore = keystorePath != null && file(keystorePath).exists()
+
+	signingConfigs {
+		release {
+			if (hasKeystore) {
+				storeFile file(keystorePath)
+				storePassword System.getenv('KEYSTORE_PASSWORD') ?: localProperties.getProperty('keystore.password')
+				keyAlias System.getenv('KEY_ALIAS') ?: localProperties.getProperty('keystore.alias')
+				keyPassword System.getenv('KEY_PASSWORD') ?: localProperties.getProperty('keystore.keyPassword')
+			}
+		}
+	}
+
 	buildTypes {
 		debug {
 			applicationIdSuffix = '.debug'
@@ -47,6 +68,12 @@ android {
 			minifyEnabled true
 			shrinkResources true
 			proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+			// Unsigned when no keystore is present: the APK still builds, and
+			// the release workflow fails loudly rather than publishing one
+			// nobody can install.
+			if (hasKeystore) {
+				signingConfig signingConfigs.release
+			}
 		}
 		nightly {
 			initWith release
