@@ -1,3 +1,15 @@
+# Mangaki
+
+An Android manga reader, built on [Kotatsu](https://github.com/KotatsuApp/Kotatsu) by koitharu and contributors,
+licensed under GPL-3.0. This is a personal, open-source fork.
+
+**Changes from upstream so far:** application id, app name, sync/provider authorities, update-check repository,
+and crash reporting (disabled — upstream reported to Kotatsu's own server using its credentials).
+
+Upstream ended development in November 2025; its original README follows.
+
+---
+
 > [!IMPORTANT]
 > In light of recent challenges — including threating actions from Kakao Entertainment Corp and upcoming Google’s
 > [new sideloading policy](https://f-droid.org/ru/2025/10/28/sideloading.html) — we’ve made the difficult decision to shut down Kotatsu and end its support. We’re deeply grateful
