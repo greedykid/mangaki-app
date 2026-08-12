@@ -29,8 +29,11 @@ android {
 		applicationId 'my.drzzy.mangaki'
 		minSdk = 23
 		targetSdk = 36
-		versionCode = 1033
-		versionName = '9.4.1'
+		// Mangaki's own line, not a continuation of upstream's. Reset while the
+		// first release still had no installs — after that it could never be
+		// lowered, because Android refuses an APK whose code is not higher.
+		versionCode = 1
+		versionName = '1.0.0'
 		generatedDensities = []
 		testInstrumentationRunner 'org.koitharu.kotatsu.HiltTestRunner'
 		ksp {
@@ -150,7 +153,7 @@ dependencies {
 		parsersVersion = System.getProperty('parsersVersionOverride')
 	}
 	//noinspection UseTomlInstead
-	implementation("com.github.KotatsuApp:kotatsu-parsers:$parsersVersion") {
+	implementation("com.github.greedykid:kotatsu-parsers:$parsersVersion") {
 		exclude group: 'org.json', module: 'json'
 	}
 

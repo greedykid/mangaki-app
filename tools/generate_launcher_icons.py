@@ -30,6 +30,10 @@ and scaled to stay inside the 33dp circle all of those contain, rather than to
 a fixed fraction of the canvas, which cannot account for its shape. That
 margin is why a correctly built adaptive icon looks smaller than expected.
 
+`ic_launcher_monochrome` is what Android 13 tints for themed icons. It is a
+silhouette, so the mascot's eyes and beak have to be holes rather than white
+fill — tinted, white reads the same as the body and the face disappears.
+
 `ic_launcher` and `ic_launcher_round` are the legacy pre-Android-8 icons,
 which are shown whole with no mask. They get a much smaller margin, and are
 flattened onto the background colour because transparency there reads as a
@@ -149,6 +153,35 @@ def fit(source: Image.Image, canvas: int, scale: float) -> Image.Image:
     return out
 
 
+def monochrome(source: Image.Image) -> Image.Image:
+    """A single-colour silhouette whose interior detail is holes, not white.
+
+    Android 13's themed icons ignore the colours of this layer and tint its
+    alpha. Pointing `<monochrome>` at the ordinary foreground — which upstream
+    did, and which survived the rebrand — therefore renders the mascot as one
+    solid blob: the eyes and beak are white pixels, not transparent ones, so
+    they tint the same as the body and vanish.
+
+    Turning those whites transparent is safe here in a way it is not in
+    `isolate`: by this point the surrounding background is already gone, so
+    everything still white is interior detail and holes are exactly what it
+    should become.
+    """
+    out = source.copy()
+    pixels = out.load()
+    for y in range(out.height):
+        for x in range(out.width):
+            r, g, b, a = pixels[x, y]
+            if a == 0:
+                continue
+            # Near-white is detail meant to read as a gap.
+            if r > 216 and g > 216 and b > 216:
+                pixels[x, y] = (0, 0, 0, 0)
+            else:
+                pixels[x, y] = (0, 0, 0, a)
+    return out
+
+
 def flatten(image: Image.Image) -> Image.Image:
     base = Image.new("RGBA", image.size, LEGACY_BACKGROUND)
     return Image.alpha_composite(base, image)
@@ -189,6 +222,7 @@ def main() -> int:
     if min(source.size) < 432:
         print(f"warning: source is only {source.width}px; xxxhdpi needs 432px and will be upscaled")
 
+    mono_source = monochrome(source)
     ratio = radius_ratio(source)
     print(f"artwork reach: {ratio:.2f}x its half-width — scaling to fit the mask")
 
@@ -199,10 +233,12 @@ def main() -> int:
 
         canvas = round(FOREGROUND_DP * factor)
         foreground = fit_radius(source, canvas, ADAPTIVE_SAFE_RADIUS_DP * factor, ratio)
+        mono = fit_radius(mono_source, canvas, ADAPTIVE_SAFE_RADIUS_DP * factor, ratio)
         legacy = flatten(fit(source, round(LEGACY_DP * factor), LEGACY_SCALE))
 
         for name, image in (
             ("ic_launcher_foreground", foreground),
+            ("ic_launcher_monochrome", mono),
             ("ic_launcher", legacy),
             ("ic_launcher_round", circular(source, round(LEGACY_DP * factor), ratio)),
         ):

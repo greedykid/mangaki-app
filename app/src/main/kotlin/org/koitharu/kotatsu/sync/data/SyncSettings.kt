@@ -24,7 +24,12 @@ class SyncSettings(
 	)
 
 	private val accountManager = AccountManager.get(context)
-	private val defaultSyncUrl = context.resources.getStringArray(R.array.sync_url_list).first()
+	// Empty unless this build ships a sync server of its own. It used to be
+	// whichever server happened to be first in the list, which is how a reader
+	// switching sync on ended up posting their library somewhere they never chose.
+	private val defaultSyncUrl = context.resources.getStringArray(R.array.sync_url_list)
+		.firstOrNull()
+		.orEmpty()
 
 	@get:WorkerThread
 	@set:WorkerThread
