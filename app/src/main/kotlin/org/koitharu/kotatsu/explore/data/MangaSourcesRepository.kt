@@ -71,7 +71,7 @@ class MangaSourcesRepository @Inject constructor(
 	val allMangaSources: Set<MangaParserSource> = Collections.unmodifiableSet(
 		EnumSet.noneOf<MangaParserSource>(MangaParserSource::class.java).also {
 			MangaParserSource.entries.filterTo(it) { source ->
-				!source.isBroken && source.locale in ENABLED_LOCALES
+				!source.isBroken && source.locale in ENABLED_LOCALES && source.name !in DEAD_SOURCES
 			}
 		}
 	)
@@ -436,5 +436,35 @@ class MangaSourcesRepository @Inject constructor(
 		 * empty collection and throws.
 		 */
 		private val ENABLED_LOCALES = setOf("id")
+
+		/**
+		 * Indonesian sources whose domain no longer exists.
+		 *
+		 * Checked on 2026-08-12: each of these returns NXDOMAIN from both
+		 * Cloudflare's and Google's public resolvers, so the site is gone rather
+		 * than merely unreachable. The parser still ships in the library — it is
+		 * a Maven dependency, not source here — and upstream has not marked it
+		 * `@Broken`, so it would otherwise appear in the catalogue and fail on
+		 * every single request.
+		 *
+		 * Deliberately only the dead ones. A source that answers 403, 429, 5xx or
+		 * a timeout does **not** belong here: most of those are Cloudflare turning
+		 * away a data-centre IP, and they work perfectly from a phone on a home
+		 * connection. Removing them would take away sources that are fine for the
+		 * people actually using the app.
+		 *
+		 * Matched by name so a parser disappearing from the library is a no-op
+		 * here rather than a compile error.
+		 */
+		private val DEAD_SOURCES = setOf(
+			"BIRDTOON",      // birdtoon.shop
+			"ICHIROMANGA",   // ichiromanga.my.id
+			"KOMIKMAMA",     // komikmama.lat
+			"MASTERKOMIK",   // tenshi01.id
+			"MONZEEKOMIK",   // monzee01.my.id
+			"NEUMANGA",      // neumanga.xyz
+			"NIMEMOB",       // www.nimemob.my.id
+			"NOROMAX",       // noromax01.my.id
+		)
 	}
 }
