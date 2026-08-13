@@ -72,7 +72,7 @@ class MangaSourcesRepository @Inject constructor(
 		EnumSet.noneOf<MangaParserSource>(MangaParserSource::class.java).also {
 			MangaParserSource.entries.filterTo(it) { source ->
 				!source.isBroken &&
-					source.locale in ENABLED_LOCALES &&
+					(source.locale in ENABLED_LOCALES || source.name in EXTRA_SOURCES) &&
 					source.name !in DEAD_SOURCES &&
 					source.name !in JS_GATED_SOURCES
 			}
@@ -476,6 +476,13 @@ class MangaSourcesRepository @Inject constructor(
 			// promotion. Checked 2026-08-13.
 			"MANGADOP",      // mangadop.net — casino promo, Turkish
 			"NGOMIK",        // ngomik.mom — unrelated Turkish site
+
+			// Still standing, but no longer a place to read manga. Checked
+			// 2026-08-14 by reading what each one actually serves now.
+			"KATAKOMIK",     // katakomik.my.id — a blog reviewing comics, nothing to read
+			"MANGAKITA",     // mangakita.id — now "Animeplus", an anime download site
+			"SEKAIKOMIK",    // sekaikomik.mom — parking page, "This domain is for sale"
+			"SIRENKOMIK",    // sirenkomik.xyz — "404 (002) pixie proxy", nothing behind it
 		)
 
 		/**
@@ -508,6 +515,8 @@ class MangaSourcesRepository @Inject constructor(
 			// Fingerprint script, then a redirect carrying tr_uuid and a computed
 			// fp value. Following it without that value gets a 302 to nowhere.
 			"COMICASO",        // comicaso.xyz
+			"DOUJINDESURIP",   // doujindesu.asia
+			"FUTARI",          // futari.info
 			"MANHWALAND_INK",  // manhwaland.asia
 			"MANHWALIST",      // manhwalist.xyz
 			"TUKANGKOMIK",     // tukangkomik.co
@@ -516,12 +525,37 @@ class MangaSourcesRepository @Inject constructor(
 			// followed all the way through and lands on a parked search page.
 			"KOMIKGO",         // komikgo.xyz
 			"KOMIKINDO",       // komiksin.id
+			"LUMOSKOMIK",      // lumos01.com
 
 			// "Redirecting..." / "Checking your browser..." behind obfuscated JS.
 			"KOMIKDEWASA",     // komikremaja.icu
 			"MANGAKYO",        // mangakyo.vip
 			"MANHWADESU",      // manhwadesu.asia
 			"MANHWAINDO",      // manhwaindo.one
+			"POJOKMANGA",      // pojokmanga.info
+		)
+
+		/**
+		 * Sources kept despite not being tagged Indonesian.
+		 *
+		 * [ENABLED_LOCALES] selects parsers by the locale in their
+		 * `@MangaSourceParser` annotation, and a site that serves many languages
+		 * is tagged with none of them — so the filter that keeps the catalogue
+		 * Indonesian was also throwing away the largest Indonesian catalogues
+		 * there are.
+		 *
+		 * MangaDex carries 6838 titles with Indonesian translations, more than
+		 * the small scanlation sites put together, over a documented API with no
+		 * bot wall in front of it — while a third of the sites in this list
+		 * answer nothing but a Cloudflare challenge. Its parser exposes a locale
+		 * filter, so a reader who wants only Indonesian can have that.
+		 *
+		 * Deliberately a short list. This is the exception to "Indonesian sources
+		 * only", not the end of it, and a source belongs here only if its
+		 * Indonesian catalogue is worth the English that comes with it.
+		 */
+		private val EXTRA_SOURCES = setOf(
+			"MANGADEX",
 		)
 	}
 }
