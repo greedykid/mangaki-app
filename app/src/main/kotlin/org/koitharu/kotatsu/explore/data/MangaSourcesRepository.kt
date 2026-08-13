@@ -438,25 +438,25 @@ class MangaSourcesRepository @Inject constructor(
 		private val ENABLED_LOCALES = setOf("id")
 
 		/**
-		 * Indonesian sources whose domain no longer exists.
+		 * Indonesian sources that are no longer the site the parser was written
+		 * for, and cannot be fixed by fixing the parser.
 		 *
-		 * Checked on 2026-08-12: each of these returns NXDOMAIN from both
-		 * Cloudflare's and Google's public resolvers, so the site is gone rather
-		 * than merely unreachable. The parser still ships in the library — it is
-		 * a Maven dependency, not source here — and upstream has not marked it
-		 * `@Broken`, so it would otherwise appear in the catalogue and fail on
-		 * every single request.
+		 * The parsers ship in the Maven dependency rather than here, and upstream
+		 * has not marked any of these `@Broken`, so without this they appear in
+		 * the catalogue and fail on every request.
 		 *
-		 * Deliberately only the dead ones. A source that answers 403, 429, 5xx or
-		 * a timeout does **not** belong here: most of those are Cloudflare turning
-		 * away a data-centre IP, and they work perfectly from a phone on a home
-		 * connection. Removing them would take away sources that are fine for the
-		 * people actually using the app.
+		 * Deliberately narrow. A source answering 403, 429, 5xx or a timeout does
+		 * **not** belong here — that is usually Cloudflare turning away a
+		 * data-centre IP, and the same site is fine from a phone. Neither does a
+		 * source whose site merely changed layout: that is a parser fix, made in
+		 * the fork, not a source to take away from readers.
 		 *
-		 * Matched by name so a parser disappearing from the library is a no-op
+		 * Matched by name so a parser leaving the library upstream is a no-op
 		 * here rather than a compile error.
 		 */
 		private val DEAD_SOURCES = setOf(
+			// Domain no longer resolves at all — NXDOMAIN from both Cloudflare's
+			// and Google's public resolvers, checked 2026-08-12.
 			"BIRDTOON",      // birdtoon.shop
 			"ICHIROMANGA",   // ichiromanga.my.id
 			"KOMIKMAMA",     // komikmama.lat
@@ -465,6 +465,14 @@ class MangaSourcesRepository @Inject constructor(
 			"NEUMANGA",      // neumanga.xyz
 			"NIMEMOB",       // www.nimemob.my.id
 			"NOROMAX",       // noromax01.my.id
+
+			// Domain expired and was re-registered by somebody else. These resolve
+			// and answer, which is exactly why they have to be named here: left in,
+			// the app would send readers who tap a manga source to a stranger's
+			// site. mangadop.net is the urgent one — it now serves a gambling
+			// promotion. Checked 2026-08-13.
+			"MANGADOP",      // mangadop.net — casino promo, Turkish
+			"NGOMIK",        // ngomik.mom — unrelated Turkish site
 		)
 	}
 }
