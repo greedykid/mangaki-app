@@ -71,7 +71,10 @@ class MangaSourcesRepository @Inject constructor(
 	val allMangaSources: Set<MangaParserSource> = Collections.unmodifiableSet(
 		EnumSet.noneOf<MangaParserSource>(MangaParserSource::class.java).also {
 			MangaParserSource.entries.filterTo(it) { source ->
-				!source.isBroken && source.locale in ENABLED_LOCALES && source.name !in DEAD_SOURCES
+				!source.isBroken &&
+					source.locale in ENABLED_LOCALES &&
+					source.name !in DEAD_SOURCES &&
+					source.name !in JS_GATED_SOURCES
 			}
 		}
 	)
@@ -473,6 +476,52 @@ class MangaSourcesRepository @Inject constructor(
 			// promotion. Checked 2026-08-13.
 			"MANGADOP",      // mangadop.net — casino promo, Turkish
 			"NGOMIK",        // ngomik.mom — unrelated Turkish site
+		)
+
+		/**
+		 * Sources that now answer with a JavaScript wall instead of their content.
+		 *
+		 * These sites are alive and their parsers are fine. What comes back to a
+		 * plain HTTP client is a stub — `<title>Loading...</title>`,
+		 * `Redirecting...`, `Checking your browser...` — carrying a script that
+		 * computes a token or a fingerprint and only then navigates to the real
+		 * page. Parsers read HTML with Jsoup and never execute any of it, so the
+		 * list is always empty.
+		 *
+		 * This is not the data-centre-IP problem: a phone's HTTP client executes
+		 * no JavaScript either, so these fail there in exactly the same way. Every
+		 * one below was seen serving its wall directly, not inferred from a
+		 * pattern; the redirects were followed by hand and either bounced or
+		 * landed on a parked search page.
+		 *
+		 * `evaluateJs` cannot rescue them: it evaluates a snippet and returns a
+		 * string, and there is no primitive that loads a URL in a WebView and
+		 * hands back the settled DOM. Making them work would mean re-implementing
+		 * each site's bot-detection script, per site, and re-doing it whenever
+		 * they change it.
+		 *
+		 * Kept separate from [DEAD_SOURCES] because the reason is different and
+		 * reversible — if a site drops its wall, deleting a line here is the whole
+		 * fix.
+		 */
+		private val JS_GATED_SOURCES = setOf(
+			// Fingerprint script, then a redirect carrying tr_uuid and a computed
+			// fp value. Following it without that value gets a 302 to nowhere.
+			"COMICASO",        // comicaso.xyz
+			"MANHWALAND_INK",  // manhwaland.asia
+			"MANHWALIST",      // manhwalist.xyz
+			"TUKANGKOMIK",     // tukangkomik.co
+
+			// "Loading..." plus a redirect signed with a JWT. komiksin.id was
+			// followed all the way through and lands on a parked search page.
+			"KOMIKGO",         // komikgo.xyz
+			"KOMIKINDO",       // komiksin.id
+
+			// "Redirecting..." / "Checking your browser..." behind obfuscated JS.
+			"KOMIKDEWASA",     // komikremaja.icu
+			"MANGAKYO",        // mangakyo.vip
+			"MANHWADESU",      // manhwadesu.asia
+			"MANHWAINDO",      // manhwaindo.one
 		)
 	}
 }
