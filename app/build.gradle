@@ -32,8 +32,8 @@ android {
 		// Mangaki's own line, not a continuation of upstream's. Reset while the
 		// first release still had no installs — after that it could never be
 		// lowered, because Android refuses an APK whose code is not higher.
-		versionCode = 11
-		versionName = '1.8.1'
+		versionCode = 12
+		versionName = '1.9.0'
 		generatedDensities = []
 		testInstrumentationRunner 'org.koitharu.kotatsu.HiltTestRunner'
 		ksp {
