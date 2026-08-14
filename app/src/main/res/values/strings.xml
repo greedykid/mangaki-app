@@ -914,4 +914,5 @@
     <string name="source_health_empty">Answered, but with no titles</string>
     <string name="source_health_copy">Copy results</string>
     <string name="source_health_copied">Results copied</string>
+    <string name="source_health_diagnose">Copy diagnostics</string>
 </resources>

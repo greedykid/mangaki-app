@@ -892,4 +892,5 @@
     <string name="source_health_empty">Menjawab, tetapi tanpa judul</string>
     <string name="source_health_copy">Salin hasil</string>
     <string name="source_health_copied">Hasil disalin</string>
+    <string name="source_health_diagnose">Salin diagnosa</string>
 </resources>

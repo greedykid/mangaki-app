@@ -10,6 +10,9 @@ import androidx.fragment.app.viewModels
 import androidx.preference.Preference
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koitharu.kotatsu.R
 import org.koitharu.kotatsu.core.model.getTitle
 import org.koitharu.kotatsu.core.nav.router
@@ -18,6 +21,7 @@ import org.koitharu.kotatsu.core.ui.dialog.buildAlertDialog
 import org.koitharu.kotatsu.core.util.ext.copyToClipboard
 import org.koitharu.kotatsu.core.util.ext.getDisplayMessage
 import org.koitharu.kotatsu.core.util.ext.observe
+import org.koitharu.kotatsu.core.util.ext.viewLifecycleScope
 import org.koitharu.kotatsu.parsers.model.MangaSource
 
 /**
@@ -126,8 +130,23 @@ class SourceHealthFragment : BasePreferenceFragment(R.string.source_health), Men
 			setNeutralButton(R.string.settings) { _, _ ->
 				router.openSourceSettings(source)
 			}
-			setNegativeButton(android.R.string.cancel, null)
+			// Not a cancel button. Dismissing is what tapping outside is for, and
+			// this is the one action that lets somebody who cannot reach the site
+			// fix its parser: it describes what the source actually served, from
+			// a connection the source will talk to.
+			setNegativeButton(R.string.source_health_diagnose) { _, _ ->
+				copyDiagnostics(source)
+			}
 		}.show()
+	}
+
+	private fun copyDiagnostics(source: MangaSource) {
+		val context = context ?: return
+		viewLifecycleScope.launch {
+			val report = withContext(Dispatchers.Default) { viewModel.diagnose(source) }
+			context.copyToClipboard(getString(R.string.source_health_diagnose), report)
+			view?.let { Snackbar.make(it, R.string.source_health_copied, Snackbar.LENGTH_SHORT).show() }
+		}
 	}
 
 	private fun bind(results: List<SourceHealth>) {
