@@ -483,6 +483,17 @@ class MangaSourcesRepository @Inject constructor(
 			"MANGAKITA",     // mangakita.id — now "Animeplus", an anime download site
 			"SEKAIKOMIK",    // sekaikomik.mom — parking page, "This domain is for sale"
 			"SIRENKOMIK",    // sirenkomik.xyz — "404 (002) pixie proxy", nothing behind it
+
+			// Blogger-backed sources whose feed is gone. The parser asks
+			// /feeds/posts/default and gets a 404 or a page of HTML, which surfaces
+			// to the reader as "Value <html ... cannot be converted to JSONObject".
+			// Confirmed from two networks — this machine and a reader's phone — so
+			// unlike most failures here it is not about whose IP is asking.
+			"KLMANHUA",      // klmanhua.blogspot.com — feed 404
+			"KOMIKREALM",    // komikrealm.org — feed 404
+			"LEPOYTL",       // www.lepoytl.cloud — feed answers HTML
+			"ULASCOMIC",     // www.ulascomic00.xyz — feed answers HTML
+			"MAGERIN",       // www.magerin.com — TLS handshake fails outright
 		)
 
 		/**
