@@ -6,7 +6,7 @@ import org.koitharu.kotatsu.core.util.ext.report
 import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
 
-class AcraCoroutineErrorHandler : AbstractCoroutineContextElement(CoroutineExceptionHandler),
+class UncaughtCoroutineErrorHandler : AbstractCoroutineContextElement(CoroutineExceptionHandler),
 	CoroutineExceptionHandler {
 
 	override fun handleException(context: CoroutineContext, exception: Throwable) {

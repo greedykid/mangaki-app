@@ -885,4 +885,9 @@
     <string name="available_pattern">%1$s tersedia</string>
     <string name="pinned_sources_only">Hanya sumber yang disematkan</string>
     <string name="hide_empty_sources">Sembunyikan sumber kosong</string>
+    <string name="source_health">Kesehatan sumber</string>
+    <string name="source_health_summary">Periksa sumber mana yang menjawab, diuji dari perangkat ini</string>
+    <string name="source_health_recheck">Periksa lagi</string>
+    <string name="source_health_ok">Menjawab dengan %1$d judul</string>
+    <string name="source_health_empty">Menjawab, tetapi tanpa judul</string>
 </resources>

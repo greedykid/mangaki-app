@@ -907,4 +907,9 @@
     <string name="download_default_directory">Default directory for downloading manga</string>
     <string name="private_app_directory_warning">This directory with all data will be deleted if you uninstall the application</string>
     <string name="available_pattern">%1$s available</string>
+    <string name="source_health">Source health</string>
+    <string name="source_health_summary">Check which of your sources are answering, from this device</string>
+    <string name="source_health_recheck">Check again</string>
+    <string name="source_health_ok">Answered with %1$d titles</string>
+    <string name="source_health_empty">Answered, but with no titles</string>
 </resources>

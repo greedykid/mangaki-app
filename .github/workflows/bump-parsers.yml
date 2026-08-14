@@ -1,0 +1,107 @@
+name: Bump parsers
+
+# The parser library is pinned to an exact commit of our fork, so a fix landing
+# there does nothing until this file's counterpart moves the pin. This opens the
+# pull request that does, once a week, a day after the fork syncs with upstream.
+#
+# A pull request rather than a push: a new parsers commit changes what every
+# source in the app does, and that is worth a glance before it ships.
+on:
+  schedule:
+    - cron: '41 5 * * 2'
+  workflow_dispatch:
+
+concurrency:
+  group: bump-parsers
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  FORK: greedykid/kotatsu-parsers
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Find the newest built commit
+        id: find
+        run: |
+          set -euo pipefail
+          current=$(sed -n 's/^parsers = "\(.*\)"/\1/p' gradle/libs.versions.toml)
+          latest=$(git ls-remote "https://github.com/$FORK.git" refs/heads/master | cut -c1-10)
+
+          echo "current=$current"
+          echo "latest=$latest"
+
+          if [ -z "$latest" ]; then
+            echo "::error::Could not read the fork's master."
+            exit 1
+          fi
+          if [ "$current" = "$latest" ]; then
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Only move the pin to something JitPack has actually built. Pointing
+          # at a commit it has not would break every build of the app until
+          # somebody noticed, and the failure would look like a network problem
+          # rather than a bad pin.
+          status=$(curl -sS --max-time 60 \
+            "https://jitpack.io/api/builds/com.github.${FORK%%/*}/${FORK##*/}/$latest" \
+            | sed -n 's/.*"status" *: *"\([^"]*\)".*/\1/p')
+          if [ "$status" != "ok" ]; then
+            echo "::error::JitPack has not built $latest (status: ${status:-unknown}). Not bumping."
+            exit 1
+          fi
+
+          echo 'changed=true' >> "$GITHUB_OUTPUT"
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          echo "latest=$latest" >> "$GITHUB_OUTPUT"
+
+      - name: Open the pull request
+        if: steps.find.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CURRENT: ${{ steps.find.outputs.current }}
+          LATEST: ${{ steps.find.outputs.latest }}
+        run: |
+          set -euo pipefail
+          branch="parsers/$LATEST"
+
+          if git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1; then
+            echo "$branch already exists; nothing to open."
+            exit 0
+          fi
+
+          git config user.name  'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git checkout -b "$branch"
+          sed -i "s/^parsers = \"$CURRENT\"/parsers = \"$LATEST\"/" gradle/libs.versions.toml
+          git add gradle/libs.versions.toml
+          git commit -m "Move the parsers pin to $LATEST
+
+The fork has merged upstream since $CURRENT. JitPack has built this commit,
+so the pin points at something that resolves.
+
+What changed in it: https://github.com/$FORK/compare/$CURRENT...$LATEST"
+          git push origin "$branch"
+
+          gh pr create \
+            --base "${GITHUB_REF_NAME}" \
+            --head "$branch" \
+            --title "Move the parsers pin to $LATEST" \
+            --body "Parsers went from \`$CURRENT\` to \`$LATEST\`.
+
+Every source in the app runs on this library, so this is worth a look before it
+ships — particularly at any parser this fork has patched, since an upstream
+change to the same file is where a fix can quietly be undone.
+
+[Compare](https://github.com/$FORK/compare/$CURRENT...$LATEST) · JitPack has
+built \`$LATEST\`, so the pin resolves.
+
+Nothing is released by merging this: a release still needs a tag."

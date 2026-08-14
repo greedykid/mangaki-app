@@ -5,6 +5,9 @@
 	<string name="url_telegram" translatable="false">https://github.com/greedykid/mangaki-app/discussions</string>
 	<string name="url_weblate" translatable="false">https://github.com/greedykid/mangaki-app</string>
 	<string name="url_user_manual" translatable="false">https://github.com/greedykid/mangaki-app#readme</string>
+	<!-- Where a person reports a bug, not where the app posts one: crash
+	     reporting is gone, because this address is a web page and every
+	     report sent to it failed after asking the reader to make it. -->
 	<string name="url_error_report" translatable="false">https://github.com/greedykid/mangaki-app/issues</string>
 	<string name="account_type_sync" translatable="false">my.drzzy.mangaki.sync</string>
 	<string name="github_updates_repo" translatable="false">greedykid/mangaki-app</string>
@@ -14,8 +17,6 @@
 	     differently-named app shipping them would be authenticating as somebody
 	     else — against terms Mangaki never agreed to, with a secret it cannot
 	     rotate and every reader's tracker account on the other end of it. -->
-	<string name="acra_login" translatable="false"></string>
-	<string name="acra_password" translatable="false"></string>
 	<string name="sync_authority_history" translatable="false">my.drzzy.mangaki.history</string>
 	<string name="sync_authority_favourites" translatable="false">my.drzzy.mangaki.favourites</string>
 	<string name="tg_backup_bot_name" translatable="false"></string>

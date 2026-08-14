@@ -29,7 +29,9 @@ class StorageAndNetworkSettingsFragment :
         addPreferencesFromResource(R.xml.pref_network_storage)
         findPreference<ListPreference>(AppSettings.KEY_DOH)?.run {
             entryValues = DoHProvider.entries.names()
-            setDefaultValueCompat(DoHProvider.NONE.name)
+            // Must agree with AppSettings.dnsOverHttps, or this would read as off
+            // while the app resolves over HTTPS regardless.
+            setDefaultValueCompat(DoHProvider.CLOUDFLARE.name)
         }
         bindProxySummary()
     }

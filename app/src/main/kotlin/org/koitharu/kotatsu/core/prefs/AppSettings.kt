@@ -453,8 +453,24 @@ class AppSettings @Inject constructor(@ApplicationContext context: Context) {
 			return raw ?: if (prefs.getBoolean(KEY_IMAGES_PROXY_OLD, false)) 0 else -1
 		}
 
+	/**
+	 * Defaults to resolving over HTTPS rather than through whatever the network
+	 * hands out.
+	 *
+	 * Upstream leaves this off, which suits a reader whose ISP is not deciding
+	 * what they may look up. Many Indonesian ones do: measured against a
+	 * catalogue of Indonesian sources, roughly a sixth failed on a home
+	 * connection while answering normally from elsewhere — including MANGA Plus,
+	 * Shueisha's own service, which has no reason to refuse anybody and returned
+	 * 403 there and 200 here.
+	 *
+	 * DNS-over-HTTPS undoes the resolver-level half of that on its own. It does
+	 * nothing about blocks that inspect the TLS handshake, and it is not
+	 * pretending to; it costs nothing when it is not needed, and a reader who
+	 * would rather use their own resolver can still choose NONE.
+	 */
 	val dnsOverHttps: DoHProvider
-		get() = prefs.getEnumValue(KEY_DOH, DoHProvider.NONE)
+		get() = prefs.getEnumValue(KEY_DOH, DoHProvider.CLOUDFLARE)
 
 	var isSSLBypassEnabled: Boolean
 		get() = prefs.getBoolean(KEY_SSL_BYPASS, false)

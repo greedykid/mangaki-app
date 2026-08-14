@@ -3,6 +3,7 @@ package org.koitharu.kotatsu.core.util.ext
 import android.content.ActivityNotFoundException
 import android.content.res.Resources
 import android.database.sqlite.SQLiteFullException
+import android.util.Log
 import androidx.annotation.DrawableRes
 import coil3.network.HttpException
 import com.davemorrissey.labs.subscaleview.decoder.ImageDecodeException
@@ -12,8 +13,6 @@ import okhttp3.internal.http2.StreamResetException
 import okio.FileNotFoundException
 import okio.IOException
 import okio.ProtocolException
-import org.acra.ktx.sendSilentlyWithAcra
-import org.acra.ktx.sendWithAcra
 import org.jsoup.HttpStatusException
 import org.koitharu.kotatsu.BuildConfig
 import org.koitharu.kotatsu.R
@@ -231,12 +230,23 @@ fun Throwable.isNetworkError(): Boolean {
         || this is HttpException && response.code == HttpURLConnection.HTTP_GATEWAY_TIMEOUT
 }
 
+/**
+ * Kept as the single place crashes are handed to, and it no longer sends them
+ * anywhere.
+ *
+ * This used to hand the throwable to ACRA, which posted it to a crash
+ * collector. Mangaki has no collector — the address it was configured with is
+ * this project's GitHub issues page, a web page that cannot accept a report —
+ * so every send failed after showing the reader a dialog asking them to make
+ * one, while still putting their device model, Android version and install id
+ * on the wire.
+ *
+ * The call sites are left intact so that wiring up a real collector later is a
+ * change to this function alone.
+ */
 fun Throwable.report(silent: Boolean = false) {
-    val exception = CaughtException(this)
-    if (!silent) {
-        exception.sendWithAcra()
-    } else if (!BuildConfig.DEBUG) {
-        exception.sendSilentlyWithAcra()
+    if (BuildConfig.DEBUG) {
+        Log.e("Mangaki", "Unhandled exception (silent=$silent)", CaughtException(this))
     }
 }
 

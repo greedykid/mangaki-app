@@ -21,6 +21,18 @@ class AppValidator @Inject constructor(
 	}
 
 	private companion object {
-		private const val CERT_SHA256 = "67e15100bb809301783edcb6348fa3bbf83034d91e62868a91053dbd70db3f18"
+		/**
+		 * The certificate Mangaki's release APKs are signed with.
+		 *
+		 * This decides whether the in-app update check runs at all
+		 * ([org.koitharu.kotatsu.core.github.AppUpdateRepository.isUpdateSupported]),
+		 * the idea being that a build signed by somebody else is not one this app
+		 * should be handing new APKs to.
+		 *
+		 * It kept upstream's fingerprint through the rebrand, which no Mangaki
+		 * build can ever match, so the check silently answered "not the original
+		 * app" every time and no reader was told about a single release.
+		 */
+		private const val CERT_SHA256 = "d5558fa43e74d67ac263f1d071631cc53ec327c24731ccc628f28eae4fb17a5d"
 	}
 }

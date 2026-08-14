@@ -4,6 +4,12 @@
 	<bool name="light_status_bar">true</bool>
 	<bool name="light_navigation_bar">false</bool>
 	<bool name="com_samsung_android_icon_container_has_icon_container">true</bool>
-	<bool name="is_sync_enabled">true</bool>
+	<!-- Off, because there is no server to sync with. Upstream ran one; Mangaki
+	     does not, which is also why sync_url_list is empty. Left on, Settings
+	     offers to add a sync account, the account screen asks for a server
+	     address the reader has no way of knowing, and two sync adapters wake up
+	     periodically to do nothing. None of the code is removed — flipping this
+	     back is the whole of enabling it again if a server ever exists. -->
+	<bool name="is_sync_enabled">false</bool>
 	<bool name="is_predictive_back_enabled">true</bool>
 </resources>
