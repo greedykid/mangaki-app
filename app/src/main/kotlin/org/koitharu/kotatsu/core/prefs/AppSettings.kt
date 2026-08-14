@@ -283,8 +283,19 @@ class AppSettings @Inject constructor(@ApplicationContext context: Context) {
 		get() = prefs.getBoolean(KEY_PROTECT_APP_BIOMETRIC, true)
 		set(value) = prefs.edit { putBoolean(KEY_PROTECT_APP_BIOMETRIC, value) }
 
+	/**
+	 * On by default: when a source redirects to another of the domains its
+	 * parser knows about, follow it instead of failing.
+	 *
+	 * Upstream ships this off. The sites in this build's catalogue move often
+	 * enough to change that — four of them changed domain inside a month, and
+	 * each one meant a patched parser and a new release before anybody could
+	 * read again. This only helps the ten or so parsers that list more than one
+	 * domain, and only when the old one still redirects, so it is no substitute
+	 * for either of those; it is free where it applies.
+	 */
 	val isMirrorSwitchingEnabled: Boolean
-		get() = prefs.getBoolean(KEY_MIRROR_SWITCHING, false)
+		get() = prefs.getBoolean(KEY_MIRROR_SWITCHING, true)
 
 	val isExitConfirmationEnabled: Boolean
 		get() = prefs.getBoolean(KEY_EXIT_CONFIRM, false)

@@ -9,4 +9,10 @@
 		android:title="@string/source_health_recheck"
 		app:showAsAction="never" />
 
+	<item
+		android:id="@+id/action_copy"
+		android:orderInCategory="51"
+		android:title="@string/source_health_copy"
+		app:showAsAction="never" />
+
 </menu>

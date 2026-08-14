@@ -58,7 +58,7 @@
         android:title="@string/tags_warnings" />
 
     <SwitchPreferenceCompat
-        android:defaultValue="false"
+        android:defaultValue="true"
         android:key="mirror_switching"
         android:summary="@string/mirror_switching_summary"
         android:title="@string/mirror_switching"

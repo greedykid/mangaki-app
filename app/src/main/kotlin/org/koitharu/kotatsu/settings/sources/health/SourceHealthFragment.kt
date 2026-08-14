@@ -8,10 +8,14 @@ import android.view.View
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.viewModels
 import androidx.preference.Preference
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import org.koitharu.kotatsu.R
 import org.koitharu.kotatsu.core.model.getTitle
+import org.koitharu.kotatsu.core.nav.router
 import org.koitharu.kotatsu.core.ui.BasePreferenceFragment
+import org.koitharu.kotatsu.core.ui.dialog.buildAlertDialog
+import org.koitharu.kotatsu.core.util.ext.copyToClipboard
 import org.koitharu.kotatsu.core.util.ext.getDisplayMessage
 import org.koitharu.kotatsu.core.util.ext.observe
 import org.koitharu.kotatsu.parsers.model.MangaSource
@@ -56,7 +60,74 @@ class SourceHealthFragment : BasePreferenceFragment(R.string.source_health), Men
 			true
 		}
 
+		R.id.action_copy -> {
+			copyResults()
+			true
+		}
+
 		else -> false
+	}
+
+	/**
+	 * The same rows as plain text, one per line.
+	 *
+	 * Reporting what a source did otherwise means a screenshot, and a screenshot
+	 * of this screen truncates exactly the part that matters: two sources here
+	 * are called "ManhwaL…" and nothing distinguishes them. Text does not
+	 * truncate, and it can be pasted into an issue.
+	 */
+	private fun copyResults() {
+		val context = context ?: return
+		val results = viewModel.results.value
+		if (results.isEmpty()) {
+			return
+		}
+		val width = results.maxOf { it.source.getTitle(context).length }
+		val text = results.joinToString("\n") { result ->
+			val name = result.source.getTitle(context).padEnd(width)
+			val outcome = when (val status = result.status) {
+				is SourceHealth.Status.Checking -> getString(R.string.loading_)
+				is SourceHealth.Status.Ok -> if (status.count > 0) {
+					getString(R.string.source_health_ok, status.count)
+				} else {
+					getString(R.string.source_health_empty)
+				}
+
+				is SourceHealth.Status.Failed -> status.error.getDisplayMessage(context.resources)
+			}
+			"$name  $outcome"
+		}
+		context.copyToClipboard(getString(R.string.source_health), text)
+		view?.let { Snackbar.make(it, R.string.source_health_copied, Snackbar.LENGTH_SHORT).show() }
+	}
+
+	/**
+	 * A row that answered is only worth re-asking. A row that failed is worth
+	 * more than that: the error is often longer than a summary line, and the
+	 * usual cause — the site having moved — has a fix the reader can apply
+	 * themselves, in this source's own settings, without waiting for anyone to
+	 * ship a new build. Four Indonesian sources changed domain in a month, so
+	 * that is not a rare road.
+	 */
+	private fun onRowClicked(source: MangaSource) {
+		val status = viewModel.results.value.firstOrNull { it.source == source }?.status
+		val error = (status as? SourceHealth.Status.Failed)?.error
+		if (error == null) {
+			viewModel.check(source)
+			return
+		}
+		val context = context ?: return
+		buildAlertDialog(context) {
+			setTitle(source.getTitle(context))
+			setMessage(error.getDisplayMessage(context.resources))
+			setPositiveButton(R.string.source_health_recheck) { _, _ ->
+				viewModel.check(source)
+			}
+			setNeutralButton(R.string.settings) { _, _ ->
+				router.openSourceSettings(source)
+			}
+			setNegativeButton(android.R.string.cancel, null)
+		}.show()
 	}
 
 	private fun bind(results: List<SourceHealth>) {
@@ -75,7 +146,7 @@ class SourceHealthFragment : BasePreferenceFragment(R.string.source_health), Men
 					isSingleLineTitle = false
 					title = result.source.getTitle(context)
 					setOnPreferenceClickListener {
-						viewModel.check(result.source)
+						onRowClicked(result.source)
 						true
 					}
 				}

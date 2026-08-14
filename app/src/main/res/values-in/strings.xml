@@ -890,4 +890,6 @@
     <string name="source_health_recheck">Periksa lagi</string>
     <string name="source_health_ok">Menjawab dengan %1$d judul</string>
     <string name="source_health_empty">Menjawab, tetapi tanpa judul</string>
+    <string name="source_health_copy">Salin hasil</string>
+    <string name="source_health_copied">Hasil disalin</string>
 </resources>
