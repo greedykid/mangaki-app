@@ -106,24 +106,34 @@ class SourceHealthFragment : BasePreferenceFragment(R.string.source_health), Men
 	}
 
 	/**
-	 * A row that answered is only worth re-asking. A row that failed is worth
-	 * more than that: the error is often longer than a summary line, and the
-	 * usual cause — the site having moved — has a fix the reader can apply
-	 * themselves, in this source's own settings, without waiting for anyone to
-	 * ship a new build. Four Indonesian sources changed domain in a month, so
-	 * that is not a rare road.
+	 * A row that came back with manga in it is only worth re-asking. Anything
+	 * else is worth more than that: the reason is often longer than a summary
+	 * line, and the two usual causes both have a way forward — a site that moved
+	 * can be pointed somewhere else from this source's own settings, and a site
+	 * that was rebuilt needs its new markup described, which only a device the
+	 * site will talk to can do.
+	 *
+	 * Answering with nothing counts as something else. It is the plainest sign
+	 * that a parser no longer matches its site, and therefore the case this
+	 * dialog exists for — an earlier version of this offered it only on an
+	 * outright failure, which shut the door on exactly the sources that most
+	 * needed opening.
 	 */
 	private fun onRowClicked(source: MangaSource) {
 		val status = viewModel.results.value.firstOrNull { it.source == source }?.status
-		val error = (status as? SourceHealth.Status.Failed)?.error
-		if (error == null) {
+		val reason = when (status) {
+			is SourceHealth.Status.Failed -> status.error.getDisplayMessage(resources)
+			is SourceHealth.Status.Ok -> if (status.count > 0) null else getString(R.string.source_health_empty_hint)
+			else -> null
+		}
+		if (reason == null) {
 			viewModel.check(source)
 			return
 		}
 		val context = context ?: return
 		buildAlertDialog(context) {
 			setTitle(source.getTitle(context))
-			setMessage(error.getDisplayMessage(context.resources))
+			setMessage(reason)
 			setPositiveButton(R.string.source_health_recheck) { _, _ ->
 				viewModel.check(source)
 			}

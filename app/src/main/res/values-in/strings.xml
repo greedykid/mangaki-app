@@ -893,4 +893,5 @@
     <string name="source_health_copy">Salin hasil</string>
     <string name="source_health_copied">Hasil disalin</string>
     <string name="source_health_diagnose">Salin diagnosa</string>
+    <string name="source_health_empty_hint">Permintaan berhasil, tetapi tidak ada judul yang bisa dibaca dari halamannya. Biasanya itu berarti situsnya dibangun ulang dan parser-nya tidak lagi cocok. Salin diagnosa supaya itu bisa diperbaiki.</string>
 </resources>

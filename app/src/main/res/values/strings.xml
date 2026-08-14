@@ -915,4 +915,5 @@
     <string name="source_health_copy">Copy results</string>
     <string name="source_health_copied">Results copied</string>
     <string name="source_health_diagnose">Copy diagnostics</string>
+    <string name="source_health_empty_hint">The request went through, but no titles could be read from the page. That usually means the site was rebuilt and its parser no longer matches it. Copying the diagnostics is what makes that fixable.</string>
 </resources>
