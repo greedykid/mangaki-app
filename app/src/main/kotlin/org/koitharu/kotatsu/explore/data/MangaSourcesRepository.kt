@@ -494,6 +494,13 @@ class MangaSourcesRepository @Inject constructor(
 			"LEPOYTL",       // www.lepoytl.cloud — feed answers HTML
 			"ULASCOMIC",     // www.ulascomic00.xyz — feed answers HTML
 			"MAGERIN",       // www.magerin.com — TLS handshake fails outright
+
+			// alterkaiscans.my.id answers, but it is not the site the parser was
+			// written for any more: it was rebuilt as "KomikDex", a Nuxt app whose
+			// pages are assembled in the browser, and it carries nine titles.
+			// Nothing a selector-based parser can do reaches that, and nine titles
+			// would not justify writing one that could.
+			"ALTERKAISCANS",
 		)
 
 		/**
