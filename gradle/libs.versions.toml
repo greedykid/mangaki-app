@@ -37,8 +37,8 @@ okio = "3.16.1"
 # Upstream ended development in November 2025, so nothing more arrives from
 # there. Resolved from our fork rather than KotatsuApp precisely so a broken
 # parser can be patched instead of being a dead end — this commit carries the
-# Komiku, Kiryuu and AinzScans moves, the Natsu rewrite and two new JSON sources.
-parsers = "e53904d020"
+# Komiku and Kiryuu repairs, the shared WordPress-API parser, and two new sources.
+parsers = "36b1cd0526"
 preference = "1.2.1"
 recyclerview = "1.4.0"
 room = "2.7.2"
