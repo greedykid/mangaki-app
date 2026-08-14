@@ -495,12 +495,18 @@ class MangaSourcesRepository @Inject constructor(
 			"ULASCOMIC",     // www.ulascomic00.xyz — feed answers HTML
 			"MAGERIN",       // www.magerin.com — TLS handshake fails outright
 
-			// alterkaiscans.my.id answers, but it is not the site the parser was
-			// written for any more: it was rebuilt as "KomikDex", a Nuxt app whose
-			// pages are assembled in the browser, and it carries nine titles.
-			// Nothing a selector-based parser can do reaches that, and nine titles
-			// would not justify writing one that could.
-			"ALTERKAISCANS",
+			// Rebuilt as applications that assemble their pages in the browser, so
+			// what arrives over HTTP is an empty shell and no selector can reach
+			// the contents. Each was identified from a diagnostic taken on a
+			// reader's own device, since all of them refuse this machine.
+			"ALTERKAISCANS", // alterkaiscans.my.id — now "KomikDex", a Nuxt app, nine titles
+			"AINZSCANS",     // v3.ainzscans01.com — Svelte, serves a loading skeleton
+			"DOUJINDESU",     // moved to doujin.desu.xxx and rebuilt in React: <div id="root">
+
+			// komikcast.li answers 410 Gone, which is a site saying in as many
+			// words that what was here is not coming back. It no longer resolves
+			// from elsewhere either.
+			"KOMIKCAST",
 		)
 
 		/**
